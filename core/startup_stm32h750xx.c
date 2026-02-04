@@ -1527,7 +1527,7 @@ void * g_pfnVectors[0xa6] __attribute__ ((section (".isr_vector"), used)) =
 
 void SystemInit();
 void __libc_init_array();
-int main();
+int  main();
 
 extern void *_sidata, *_sdata, *_edata;
 extern void *_sbss, *_ebss;

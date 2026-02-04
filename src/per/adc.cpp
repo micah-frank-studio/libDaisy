@@ -27,7 +27,7 @@ constexpr Pin PIN_CHN_17 = Pin(PORTA, 1);
 constexpr Pin PIN_CHN_18 = Pin(PORTA, 4);
 constexpr Pin PIN_CHN_19 = Pin(PORTA, 5);
 
-#define DSY_ADC_MAX_MUX_CHANNELS 8
+#define DSY_ADC_MAX_MUX_CHANNELS 16
 #define DSY_ADC_MAX_RESOLUTION 65536.0f
 
 static const uint32_t dsy_adc_channel_map[DSY_ADC_MAX_CHANNELS] = {
@@ -101,6 +101,8 @@ struct dsy_adc
 // Static Functions
 static int get_num_mux_pins_required(int num_mux_ch)
 {
+    if(num_mux_ch > 8)
+        return 4;
     if(num_mux_ch > 4)
         return 3;
     if(num_mux_ch > 2)
@@ -164,6 +166,7 @@ void AdcChannelConfig::InitMux(Pin                               adc_pin,
                                Pin                               mux_0,
                                Pin                               mux_1,
                                Pin                               mux_2,
+                               Pin                               mux_3,
                                AdcChannelConfig::ConversionSpeed speed)
 {
     size_t pins_to_init;
@@ -179,8 +182,9 @@ void AdcChannelConfig::InitMux(Pin                               adc_pin,
     mux_pin_[0].GetConfig().pin = mux_0;
     mux_pin_[1].GetConfig().pin = mux_1;
     mux_pin_[2].GetConfig().pin = mux_2;
+    mux_pin_[3].GetConfig().pin = mux_3;
 
-    mux_channels_ = mux_channels < 8 ? mux_channels : 8;
+    mux_channels_ = mux_channels < 16 ? mux_channels : 16;
     pins_to_init  = get_num_mux_pins_required(mux_channels_);
     for(size_t i = 0; i < pins_to_init; i++)
     {
@@ -442,6 +446,11 @@ write_mux_value(uint8_t chn, uint8_t idx, uint8_t num_mux_pins_to_write)
     {
         GPIO& p2 = adc.pin_cfg[chn].mux_pin_[2];
         p2.Write((idx & 0x04) > 0);
+    }
+    if(num_mux_pins_to_write > 3)
+    {
+        GPIO& p3 = adc.pin_cfg[chn].mux_pin_[3];
+        p3.Write((idx & 0x08) > 0);
     }
 }
 
